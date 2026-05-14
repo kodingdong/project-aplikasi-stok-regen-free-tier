@@ -1,10 +1,4 @@
 [build]
-  # Perintah untuk menjalankan script build kita
-  command = "bash build.sh"
-  
-  # Folder yang akan dipublikasikan (root karena vanilla JS)
+  # Buat config.js langsung (tanpa file build.sh terpisah)
+  command = "printf 'const SUPABASE_URL=\"%s\";const SUPABASE_ANON_KEY=\"%s\";const APP_CONFIG={name:\"Stok Reagen Lab\",version:\"1.0.0\",logsLimit:100,toastDuration:3000};' \"$SUPABASE_URL\" \"$SUPABASE_ANON_KEY\" > js/config.js"
   publish = "."
-
-[build.environment]
-  # Default environment variables (opsional, sebaiknya diisi di dashboard)
-  NODE_VERSION = "18"
