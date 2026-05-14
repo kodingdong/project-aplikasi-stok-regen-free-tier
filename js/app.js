@@ -331,9 +331,17 @@ const App = (() => {
                 <div class="form-row">
                     <div class="form-group">
                         <label for="f-barcode">Barcode ID</label>
-                        <input type="text" id="f-barcode" maxlength="50"
-                            value="${UIHelpers.escapeHtml(reagent?.barcode_id || '')}"
-                            placeholder="Contoh: RGN-001">
+                        <div class="barcode-input-group">
+                            <input type="text" id="f-barcode" maxlength="50"
+                                value="${UIHelpers.escapeHtml(reagent?.barcode_id || '')}"
+                                placeholder="Contoh: RGN-001">
+                            <button type="button" class="btn btn-sm btn-outline" id="btn-scan-form" title="Scan via kamera">
+                                📷
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline" id="btn-generate-barcode" title="Generate otomatis">
+                                🔄 Auto
+                            </button>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="f-expiry">Tanggal Kedaluwarsa</label>
@@ -367,6 +375,36 @@ const App = (() => {
         });
 
         document.getElementById('btn-save-reagent').addEventListener('click', handleSaveReagent);
+
+        // Tombol Scan Barcode di dalam form
+        const btnScanForm = document.getElementById('btn-scan-form');
+        if (btnScanForm) {
+            btnScanForm.addEventListener('click', () => {
+                UIHelpers.hideModal();
+                BarcodeModule.startScan((barcode) => {
+                    // Setelah scan, buka kembali form dan isi barcode
+                    showReagentFormModal(reagent);
+                    setTimeout(() => {
+                        const barcodeInput = document.getElementById('f-barcode');
+                        if (barcodeInput) barcodeInput.value = barcode;
+                    }, 200);
+                });
+            });
+        }
+
+        // Tombol Generate Barcode ID otomatis
+        const btnGenerate = document.getElementById('btn-generate-barcode');
+        if (btnGenerate) {
+            btnGenerate.addEventListener('click', async () => {
+                btnGenerate.textContent = '⏳';
+                btnGenerate.disabled = true;
+                const newId = await BarcodeModule.generateBarcodeId();
+                document.getElementById('f-barcode').value = newId;
+                btnGenerate.textContent = '🔄 Auto';
+                btnGenerate.disabled = false;
+                UIHelpers.showToast(`Barcode ID "${newId}" berhasil di-generate.`, 'info');
+            });
+        }
     }
 
     async function handleSaveReagent() {
@@ -454,6 +492,29 @@ const App = (() => {
     function setupFormListeners() {
         const btnAdd = document.getElementById('btn-add-reagent');
         if (btnAdd) btnAdd.addEventListener('click', openAddModal);
+
+        // Tombol Scan Barcode di toolbar (halaman Daftar)
+        const btnScan = document.getElementById('btn-scan-barcode');
+        if (btnScan) {
+            // Sembunyikan jika kamera tidak didukung (desktop tanpa webcam)
+            if (!BarcodeModule.isCameraSupported()) {
+                btnScan.style.display = 'none';
+            }
+            btnScan.addEventListener('click', () => {
+                BarcodeModule.startScan((barcode) => {
+                    // Setelah scan, cari reagen yang cocok
+                    searchQuery = barcode;
+                    document.getElementById('search-input').value = barcode;
+                    applyFilterAndSearch();
+                });
+            });
+        }
+
+        // Tombol Tutup Scanner
+        const btnScannerClose = document.getElementById('scanner-close');
+        if (btnScannerClose) {
+            btnScannerClose.addEventListener('click', () => BarcodeModule.stopScan());
+        }
 
         const btnExportReagents = document.getElementById('btn-export-reagents');
         if (btnExportReagents) btnExportReagents.addEventListener('click', () => {
