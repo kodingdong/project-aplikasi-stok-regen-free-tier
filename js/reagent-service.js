@@ -142,11 +142,13 @@ const ReagentService = (() => {
     // READ: Ambil ringkasan untuk dashboard (dari view)
     // --------------------------------------------------------
     async function getDashboardSummary() {
+        // Views kadang tidak compatible dengan .single(), gunakan select biasa
+        // lalu ambil elemen pertama
         const { data, error } = await getClient()
             .from('dashboard_summary')
-            .select('*')
-            .single();
-        return { data, error };
+            .select('*');
+        // Kembalikan objek pertama (bukan array)
+        return { data: Array.isArray(data) ? data[0] : data, error };
     }
 
     // --------------------------------------------------------

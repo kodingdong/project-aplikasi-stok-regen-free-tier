@@ -16,13 +16,28 @@ const App = (() => {
     // INIT: Jalankan saat halaman pertama kali dimuat
     // --------------------------------------------------------
     async function init() {
-        setupNavigation();
-        setupModalClose();
-        setupSearchBar();
-        setupFilterChips();
-        setupFormListeners();
-        await loadDashboard();
-        await loadReagents();
+        console.log('[App] Inisialisasi dimulai...');
+        try {
+            setupNavigation();
+            setupModalClose();
+            setupSearchBar();
+            setupFilterChips();
+            setupFormListeners();
+            console.log('[App] Listeners berhasil dipasang.');
+        } catch (e) {
+            console.error('[App] Gagal memasang listeners:', e);
+        }
+
+        // Jalankan data loading secara paralel agar tidak saling blokir
+        console.log('[App] Memulai pemuatan data...');
+        Promise.all([
+            loadDashboard(),
+            loadReagents()
+        ]).then(() => {
+            console.log('[App] Inisialisasi selesai sepenuhnya.');
+        }).catch(err => {
+            console.error('[App] Terjadi kesalahan saat muat data awal:', err);
+        });
     }
 
     // --------------------------------------------------------
@@ -55,11 +70,25 @@ const App = (() => {
     // DASHBOARD
     // --------------------------------------------------------
     async function loadDashboard() {
+        console.log('[App] Memuat dashboard...');
         const { data, error } = await ReagentService.getDashboardSummary();
         if (error) {
-            console.error('Gagal load dashboard:', error.message);
+            console.error('[App] Gagal load dashboard:', error.message, error);
+            UIHelpers.renderDashboard({
+                total_reagents: '?', low_stock_count: '?',
+                empty_stock_count: '?', expired_count: '?',
+                expiring_soon_count: '?', liquid_count: '?', solid_count: '?'
+            });
             return;
         }
+        if (!data) {
+            console.warn('[App] Dashboard summary kosong (data null/undefined).');
+            UIHelpers.renderDashboard({ total_reagents: 0, low_stock_count: 0,
+                empty_stock_count: 0, expired_count: 0, expiring_soon_count: 0,
+                liquid_count: 0, solid_count: 0 });
+            return;
+        }
+        console.log('[App] Dashboard data diterima:', data);
         UIHelpers.renderDashboard(data);
     }
 
@@ -67,10 +96,11 @@ const App = (() => {
     // DAFTAR REAGEN
     // --------------------------------------------------------
     async function loadReagents() {
+        console.log('[App] Memuat daftar reagen...');
         UIHelpers.setLoading('reagent-list', true);
         const { data, error } = await ReagentService.getAllReagents();
         if (error) {
-            UIHelpers.showToast('Gagal memuat data reagen: ' + error.message, 'error');
+            console.error('[App] Gagal memuat data reagen:', error.message, error);
             document.getElementById('reagent-list').innerHTML =
                 '<div class="error-state">❌ Gagal memuat data. Cek koneksi internet atau konfigurasi Supabase.</div>';
             return;
@@ -488,5 +518,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             </div>`;
         return;
     }
+
+    // Tunggu supabaseClient siap (CDN mungkin belum selesai load)
+    let retries = 0;
+    while (!window.supabaseClient && retries < 20) {
+        await new Promise(r => setTimeout(r, 100));
+        retries++;
+    }
+
+    if (!window.supabaseClient) {
+        console.error('Supabase client gagal diinisialisasi setelah 2 detik.');
+        UIHelpers.showToast('Gagal terhubung ke database. Cek koneksi internet.', 'error');
+        return;
+    }
+
     await App.init();
 });
