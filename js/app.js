@@ -496,10 +496,6 @@ const App = (() => {
         // Tombol Scan Barcode di toolbar (halaman Daftar)
         const btnScan = document.getElementById('btn-scan-barcode');
         if (btnScan) {
-            // Sembunyikan jika kamera tidak didukung (desktop tanpa webcam)
-            if (!BarcodeModule.isCameraSupported()) {
-                btnScan.style.display = 'none';
-            }
             btnScan.addEventListener('click', () => {
                 BarcodeModule.startScan((barcode) => {
                     // Setelah scan, cari reagen yang cocok
