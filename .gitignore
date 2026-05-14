@@ -1,0 +1,11 @@
+# Jangan commit konfigurasi dengan credentials asli
+# Ganti config.example.js dengan credentials Anda di config.js
+js/config.js
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+*.swp
