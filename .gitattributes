@@ -1,0 +1,2 @@
+# Pastikan shell script selalu LF (bukan CRLF) saat checkout
+*.sh text eol=lf
