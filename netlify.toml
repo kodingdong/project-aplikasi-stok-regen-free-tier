@@ -1,4 +1,3 @@
 [build]
-  # Buat config.js langsung (tanpa file build.sh terpisah)
-  command = "printf 'const SUPABASE_URL=\"%s\";const SUPABASE_ANON_KEY=\"%s\";const APP_CONFIG={name:\"Stok Reagen Lab\",version:\"1.0.0\",logsLimit:100,toastDuration:3000};' \"$SUPABASE_URL\" \"$SUPABASE_ANON_KEY\" > js/config.js"
+  command = "echo \"const SUPABASE_URL='$SUPABASE_URL';const SUPABASE_ANON_KEY='$SUPABASE_ANON_KEY';const APP_CONFIG={name:'Stok Reagen Lab',version:'1.0.0',logsLimit:100,toastDuration:3000};\" > js/config.js && echo 'Build OK'"
   publish = "."
