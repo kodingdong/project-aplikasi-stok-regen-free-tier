@@ -1,0 +1,11 @@
+{
+  "name": "project-aplikasi-stok-regen-free-tier",
+  "version": "1.0.0",
+  "description": "Aplikasi personal untuk dokumentasi stok reagen kimia lab.",
+  "scripts": {
+    "build": "bash build.sh"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

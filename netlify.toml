@@ -1,0 +1,10 @@
+[build]
+  # Perintah untuk menjalankan script build kita
+  command = "bash build.sh"
+  
+  # Folder yang akan dipublikasikan (root karena vanilla JS)
+  publish = "."
+
+[build.environment]
+  # Default environment variables (opsional, sebaiknya diisi di dashboard)
+  NODE_VERSION = "18"
